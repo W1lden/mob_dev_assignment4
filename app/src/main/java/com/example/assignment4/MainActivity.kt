@@ -18,6 +18,25 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.lazy.items
 import com.example.assignment4.data.UserRepository
+import com.example.assignment4.network.ApiService
+import com.example.assignment4.network.PostRepository
+import com.example.assignment4.network.RetrofitInstance
+import com.example.assignment4.ui.PostScreen
+
+//class MainActivity : ComponentActivity() {
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//
+//        val apiService = RetrofitInstance.retrofit.create(ApiService::class.java)
+//        val repository = PostRepository(apiService)
+//
+//        setContent {
+//            Assignment4Theme {
+//                PostScreen(repository)
+//            }
+//        }
+//    }
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {

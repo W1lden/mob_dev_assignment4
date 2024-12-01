@@ -17,19 +17,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.lazy.items
+import com.example.assignment4.data.UserRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Get an instance of the database and UserDao
         val database = AppDatabase.getDatabase(this)
-        val userDao = database.userDao()
+        val repository = UserRepository(database.userDao())
 
         setContent {
             Assignment4Theme {
-                UserScreen(userDao)
+                UserScreen(repository)
             }
         }
     }
@@ -37,22 +37,16 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserScreen(userDao: UserDao) {
-    // State to hold the list of users
+fun UserScreen(repository: UserRepository) {
     var userList by remember { mutableStateOf(listOf<User>()) }
-
-    // Mutable state variables for user input
     var userName by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
-
-    // Coroutine scope for handling database operations
     val coroutineScope = rememberCoroutineScope()
 
-    // Load users from the database when the screen is first displayed
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             userList = withContext(Dispatchers.IO) {
-                userDao.getAll() // Fetch users in a background thread
+                repository.getAllUsers()
             }
         }
     }
@@ -71,7 +65,6 @@ fun UserScreen(userDao: UserDao) {
                     .padding(padding)
                     .padding(16.dp)
             ) {
-                // Input fields for user details
                 TextField(
                     value = userName,
                     onValueChange = { userName = it },
@@ -90,16 +83,15 @@ fun UserScreen(userDao: UserDao) {
                         .padding(vertical = 8.dp)
                 )
 
-                // Button to insert a new user
                 Button(
                     onClick = {
                         coroutineScope.launch {
                             val newUser = User(name = userName, email = userEmail)
                             withContext(Dispatchers.IO) {
-                                userDao.insertAll(newUser) // Insert user in a background thread
+                                repository.addUsers(newUser)
                             }
                             userList = withContext(Dispatchers.IO) {
-                                userDao.getAll() // Refresh user list
+                                repository.getAllUsers()
                             }
                         }
                         userName = ""
@@ -110,9 +102,8 @@ fun UserScreen(userDao: UserDao) {
                     Text("Add User")
                 }
 
-                // Display the list of users
                 LazyColumn {
-                    items(userList) { user -> // Correct `items` function
+                    items(userList) { user ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -120,16 +111,18 @@ fun UserScreen(userDao: UserDao) {
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text("${user.name} - ${user.email}")
-                            Button(onClick = {
-                                coroutineScope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        userDao.delete(user) // Delete user in a background thread
-                                    }
-                                    userList = withContext(Dispatchers.IO) {
-                                        userDao.getAll() // Refresh user list
+                            Button(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        withContext(Dispatchers.IO) {
+                                            repository.deleteUser(user)
+                                        }
+                                        userList = withContext(Dispatchers.IO) {
+                                            repository.getAllUsers()
+                                        }
                                     }
                                 }
-                            }) {
+                            ) {
                                 Text("Delete")
                             }
                         }

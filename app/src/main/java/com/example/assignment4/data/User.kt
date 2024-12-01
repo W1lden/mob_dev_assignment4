@@ -4,14 +4,14 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "user_table") // Add @Entity annotation
+@Entity(tableName = "user_table")
 data class User(
-    @PrimaryKey(autoGenerate = true) // Add @PrimaryKey annotation
+    @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    @ColumnInfo(name = "name") // Optional column name
+    @ColumnInfo(name = "name")
     val name: String,
 
-    @ColumnInfo(name = "email") // Optional column name
+    @ColumnInfo(name = "email")
     val email: String
 )
